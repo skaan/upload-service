@@ -1,0 +1,21 @@
+sudo: required
+services:
+  - docker
+language: node_js
+node_js: "node"
+cache: npm
+
+before_install:
+  - docker build -t skaan94/upload-service-test -f ./Dockerfile.dev .
+
+script:
+  - docker run -e CI=true skaan94/upload-service-test npm run test:cov
+
+after_success:
+  - docker build -t skaan94/upload-service .
+
+  # Log in to the docker CLI
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+
+  # Take those images and push to Docker Hub
+  - docker push skaan94/upload-service
